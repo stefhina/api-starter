@@ -9,7 +9,6 @@ import { uploadError } from '../../middlewares/error';
 export default (path: string, apiRouter: Router): void => {
   const route = router(path, apiRouter);
 
-
   /** Route definitions */
   route.post('/signup', prevalidate, validateUser, userController.signupUser);
   route.post('/login', userController.loginUser);
