@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 
 /** Route controller responsible for service invocation. */
-class UserController {
+class UserController
+{
   getUser = async (
     { params }: Request,
     res: Response,
