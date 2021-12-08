@@ -57,6 +57,25 @@ class UserController {
     res: Response,
     next: NextFunction
   ): Promise<void> => {};
+
+  uploadAvatar = async (
+    { currentUser, file }: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {};
+
+  getAvatar = async (
+    { params }: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {};
+
+  deleteAvatar = async (
+    { currentUser }: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {};
 }
 
 export default new UserController();
+
