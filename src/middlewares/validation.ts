@@ -11,6 +11,8 @@ const prevalidate = (
 ): void => {
   body.creationMode = method === 'POST' ? true : false;
   next();
+  
+  
 };
 
 const validateUser = async (
@@ -18,12 +20,15 @@ const validateUser = async (
   _: Response,
   next: NextFunction
 ): Promise<void> => {
-  try {
+  try
+  
+  {
     await schema.validateAsync(body, { allowUnknown: true });
     next();
   } catch (err) {
     next({ status: 400, reason: err.message });
   }
+  
 };
 
 export { prevalidate, validateUser };
