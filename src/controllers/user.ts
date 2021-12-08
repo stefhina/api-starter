@@ -9,75 +9,194 @@ class UserController {
     { params }: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {};
+  ): Promise<void> => {
+    try {
+      const user = await userService.getUser(params.id);
+
+      res.send(user);
+    } catch (err) {
+      next({ status: 404 });
+    }
+  };
 
   signupUser = async (
     { body }: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {};
+  ): Promise<void> => {
+    try {
+      const user = await userService.createUser({
+        ...body,
+        verificationToken: 'null',
+      });
+
+      res.redirect(`/user/${user._id}/send-verification`);
+    } catch (err) {
+      next({ status: 400, reason: err.message });
+    }
+  };
 
   loginUser = async (
     { body }: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {};
+  ): Promise<void> => {
+    try {
+      const { email, password } = body;
+      const { user, authToken } = await userService.loginUser(email, password);
+
+      res.send({ user, authToken });
+    } catch (err) {
+      next({ status: 400, reason: err.message });
+    }
+  };
 
   verifyUser = async (
     { params }: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {};
+  ): Promise<void> => {
+    try {
+      const { verificationToken } = params;
+
+      await User.verifyUser(verificationToken);
+
+      res.send({ result: 'verification successful, please login' });
+    } catch (err) {
+      next({ status: 404 });
+    }
+  };
 
   sendVerification = async (
     { params }: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {};
+  ): Promise<void> => {
+    try {
+      // For debugging only
+      const isDevMode = config('NODE_ENV') === 'development';
+
+      const { user, verificationToken } =
+        await userService.getVerificationForUser(params.id);
+
+      isDevMode ||
+        (await userService.sendWelcomeMail(
+          user.email,
+          user.firstname,
+          verificationToken
+        ));
+
+      res.send({
+        result: `verification link has been sent to ${user.email}`,
+        debug: isDevMode ? verificationToken : undefined,
+      });
+    } catch (err) {
+      next({ status: 404 });
+    }
+  };
 
   logoutCurrentSession = async (
     { currentUser, authToken }: Request,
     res: Response,
     next: NextFunction
-  ) => {};
+  ) => {
+    try {
+      await userService.logoutCurrentSession(currentUser, authToken);
+
+      res.send({ result: 'logged out from current session' });
+    } catch (err) {
+      next({ status: 400 });
+    }
+  };
 
   logoutAllSessions = async (
     { currentUser }: Request,
     res: Response,
     next: NextFunction
-  ) => {};
+  ) => {
+    try {
+      await userService.logoutAllSessions(currentUser);
 
-  getProfile = ({ currentUser }: Request, res: Response) => {};
+      res.send({ result: 'logged out from all sessions' });
+    } catch (err) {
+      next({ status: 400 });
+    }
+  };
+
+  getProfile = ({ currentUser }: Request, res: Response) => {
+    res.send(currentUser);
+  };
 
   updateProfile = async (
     { currentUser, body }: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {};
+  ): Promise<void> => {
+    try {
+      const newUser = await userService.updateUser(currentUser, body);
+
+      res.send(newUser);
+    } catch (err) {
+      next({ status: 400, reason: err.message });
+    }
+  };
 
   deleteProfile = async (
     { currentUser }: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {};
+  ): Promise<void> => {
+    try {
+      const user = await currentUser.delete();
+
+      res.send(user);
+    } catch (err) {
+      next({ status: 404 });
+    }
+  };
 
   uploadAvatar = async (
     { currentUser, file }: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {};
+  ): Promise<void> => {
+    try {
+      await userService.uploadAvatar(currentUser, file);
+
+      res.send({ result: 'avatar updated' });
+    } catch (err) {
+      next({ status: 400, reason: 'no image provided' });
+    }
+  };
 
   getAvatar = async (
     { params }: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {};
+  ): Promise<void> => {
+    try {
+      const avatar = await userService.getAvatar(params.id);
+
+      res.set('Content-Type', 'image/png');
+      res.send(avatar);
+    } catch (err) {
+      next({ status: 404 });
+    }
+  };
 
   deleteAvatar = async (
     { currentUser }: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {};
+  ): Promise<void> => {
+    try {
+      await userService.deleteAvatar(currentUser);
+
+      res.send({ result: 'avatar removed' });
+    } catch (err) {
+      next({ status: 404 });
+    }
+  };
 }
 
 export default new UserController();
