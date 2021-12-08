@@ -1,4 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
+import User from '../models/user';
+import userService from '../services/user';
+import config from '../app/config';
 
 /** Route controller responsible for service invocation. */
 class UserController {
@@ -78,4 +81,3 @@ class UserController {
 }
 
 export default new UserController();
-
